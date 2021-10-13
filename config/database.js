@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const { MONGO_URI } = process.env;
 
-export default () => {
+const connect = () => {
     mongoose.connect(MONGO_URI).then(() => {
         console.log("Succesfully connected to database.")
     }).catch((error) => {
@@ -11,3 +11,5 @@ export default () => {
         process.exit(1);
     })
 }
+
+export { connect };

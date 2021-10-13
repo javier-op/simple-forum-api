@@ -1,10 +1,10 @@
 import "dotenv/config";
 
 import bcrypt from "bcryptjs";
-import connect from "./config/database.js";
+import { connect } from "./config/database.js";
 import jwt from "jsonwebtoken";
 import express from "express";
-import User from "./model/user.js";
+import { User } from "./model/user.js";
 
 const app = express();
 app.use(express.json());
@@ -53,4 +53,4 @@ app.post("/login", (req, res) => {
 
 });
 
-export default app;
+export { app };
