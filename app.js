@@ -11,7 +11,7 @@ connect();
 app.post("/login", userLogin);
 app.post("/register", userRegister);
 app.get("/welcome", auth, (req, res) => {
-    res.status(200).send("Welcome 🎉")
+    res.status(200).send("Welcome 🎉");
 });
 
 export { app };
