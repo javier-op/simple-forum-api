@@ -1,15 +1,14 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-require("dotenv").config()
-require("./config/database").connect()
+import "dotenv/config";
 
-const express = require("express");
+import bcrypt from "bcryptjs";
+import connect from "./config/database.js";
+import jwt from "jsonwebtoken";
+import express from "express";
+import User from "./model/user.js";
 
 const app = express();
-
 app.use(express.json());
-
-const User = require("./model/user")
+connect();
 
 app.post("/register", async (req, res) => {
     try {
@@ -54,4 +53,4 @@ app.post("/login", (req, res) => {
 
 });
 
-module.exports = app;
+export default app;
