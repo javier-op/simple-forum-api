@@ -2,10 +2,11 @@ import mongoose from "mongoose";
 
 const threadSchema = new mongoose.Schema({
     author: {type: mongoose.ObjectId},
-    creationDate: {type: Date},
-    lastUpdate: {type: Date},
+    createdAt: {type: Date},
+    updatedAt: {type: Date},
     title: {type: String},
-    content: {type: String}
+    content: {type: String},
+    deleted: {type: Boolean}
 });
 
 const Thread = mongoose.model("thread", threadSchema);

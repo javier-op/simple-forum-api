@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 const commentSchema = new mongoose.Schema({
     author: {type: mongoose.ObjectId},
     thread: {type: mongoose.ObjectId},
-    creationDate: {type: Date},
-    lastUpdate: {type: Date},
-    content: {type: String}
+    createdAt: {type: Date},
+    updatedAt: {type: Date},
+    content: {type: String},
+    deleted: {type: Boolean}
 });
 
 const Comment = mongoose.model("comment", commentSchema);
