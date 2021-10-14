@@ -5,34 +5,32 @@ import { User } from "../models/user.js";
 const userRegister = async (req, res) => {
     try {
         const { username, email, password } = req.body;
-
         if (!(username && email && password)) {
-            req.statusCode(400).send("All input is required.");
+            res.status(400).send("All input is required.");
+            return;
         }
-
         const usernameMatch = await User.findOne({ username });
         const emailMatch = await User.findOne({ email });
         if (usernameMatch) {
-            return res.status(409).send("Username already exists. Please login.");
+            res.status(409).send("Username already exists. Please login.");
+            return;
         } else if (emailMatch) {
-            return res.status(409).send("Email already in use. Please use another.");
+            res.status(409).send("Email already in use. Please use another.");
+            return;
         }
-
-        encryptedPassword = await bcrypt.hash(password, 10);
-
+        const encryptedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             username,
             email: email.toLowerCase(),
             password: encryptedPassword,
         });
-
         const token = jwt.sign(
-            { user_id: user._id, username },
+            { user_id: user._id, username, email },
             process.env.TOKEN_KEY,
             { expiresIn: process.env.JWT_EXPIRATION_TIME }
         );
         user.token = token;
-        res.status(201).json(user);
+        return res.status(201).json({ username, email, token });
     } catch (err) {
         console.log(err);
     }
@@ -41,24 +39,24 @@ const userRegister = async (req, res) => {
 const userLogin = async (req, res) => {
     try {
         const { username, password } = req.body;
-
         if (!(username && password)) {
             res.status(400).send("Username and password are required for login.");
+            return;
         }
-
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username }).select("+password");
         let passwordMatch = false;
         if (user) {
             passwordMatch = await bcrypt.compare(password, user.password);
         }
         if (user && passwordMatch) {
             const token = jwt.sign(
-                { user_id: user._id, username },
+                { user_id: user._id, username, email: user.email },
                 process.env.TOKEN_KEY,
                 { expiresIn: process.env.JWT_EXPIRATION_TIME }
             );
             user.token = token;
-            res.status(200).json(user);
+            const { email } = user;
+            res.status(201).json({ username, email, token });
         } else {
             res.status(400).send("Invalid credentials");
         }

@@ -4,18 +4,18 @@ import { Comment } from "../models/comment.js"
 const threadCreate = async (req, res) => {
     try {
         const { title, content } = req.body;
-
         if (!(title && content)) {
-            req.statusCode(400).send("All input is required.");
+            req.status(400).send("All input is required.");
+            return;
         }
         const currentDate = new Date();
+        const { user_id, username, email } = req.user;
         const thread = await Thread.create({
-            author: req.user.user_id,
+            author: { user_id, username, email },
             createdAt: currentDate,
             updatedAt: currentDate,
             title,
-            content,
-            deleted: false
+            content
         });
         res.status(201).json(thread);
     } catch(err) {
@@ -25,16 +25,18 @@ const threadCreate = async (req, res) => {
 
 const threadGetById = async (req, res) => {
     try {
-        const { id } = req.body;
+        const { id } = req.params;
         if (!(id)) {
             req.statusCode(400).send("An id is required.");
+            return;
         }
         const thread = await Thread.findById(id);
-        if (thread.deleted) {
-            req.statusCode(400).send("Thread was deleted.")
+        if (!thread || thread.deleted) {
+            res.status(404).send("Thread doesn't exist.");
+            return;
         }
-        const comments = await Comment.find({thread: id});
-        res.status(201).json({ thread, comments });
+        const comments = await Comment.find({thread_id: id});
+        res.status(200).json({ thread, comments });
     } catch(err) {
         console.log(err);
     }
@@ -42,8 +44,8 @@ const threadGetById = async (req, res) => {
 
 const threadList = async (req, res) => {
     try {
-        const threads = await Thread.find({deleted: false});
-        res.status(201).json({ threads });
+        const threads = await Thread.find({deleted: false}).sort({updatedAt: -1});
+        res.status(200).json({ threads });
     } catch(err) {
         console.log(err);
     }
@@ -51,16 +53,28 @@ const threadList = async (req, res) => {
 
 const threadUpdate = async (req, res) => {
     try {
-        const { id, content } = req.body;
+        const { id } = req.params;
+        const { content } = req.body;
         if (!(id)) {
-            req.statusCode(400).send("An id is required.");
-        }
-        if (!(content)) {
-            req.statusCode(400).send("All input is required.");
+            res.status(400).send("An id is required.");
+            return;
+        } else if (!(content)) {
+            res.status(400).send("All input is required.");
+            return;
         }
         const thread = await Thread.findById(id);
+        if (!thread || thread.deleted) {
+            res.status(404).send("Thread doesn't exist.");
+            return;
+        }
+        if (thread.author.user_id.toString() !== req.user.user_id) {
+            res.status(403).send("Permission denied.");
+            return;
+        }
         thread.content = content;
-        res.status(201).json({ thread });
+        thread.updatedAt = new Date();
+        thread.save();
+        res.status(200).json({ thread });
     } catch(err) {
         console.log(err);
     }
@@ -68,14 +82,27 @@ const threadUpdate = async (req, res) => {
 
 const threadDelete = async (req, res) => {
     try {
-        const { id } = req.body;
+        const { id } = req.params;
         if (!(id)) {
-            req.statusCode(400).send("An id is required.");
+            res.status(400).send("An id is required.");
+            return;
         }
         const thread = await Thread.findById(id);
-        thread.deleted = false;
-        res.status(201).json({ thread });
+        if (!thread || thread.deleted) {
+            res.status(404).send("Thread doesn't exist.");
+            return;
+        }
+        if (thread.author.user_id.toString() !== req.user.user_id) {
+            res.status(403).send("Permission denied.");
+            return;
+        }
+        thread.deleted = true;
+        thread.updatedAt = new Date();
+        thread.save();
+        res.status(200).send("Content deleted.");
     } catch(err) {
         console.log(err);
     }
 };
+
+export { threadCreate, threadGetById, threadList, threadUpdate, threadDelete };
