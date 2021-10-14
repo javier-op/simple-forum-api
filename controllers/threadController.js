@@ -1,5 +1,5 @@
-import { Thread } from "../models/thread.js"
-import { Comment } from "../models/comment.js"
+import { Comment } from "../models/comment.js";
+import { Thread } from "../models/thread.js";
 
 const threadCreate = async (req, res) => {
     try {
@@ -17,7 +17,8 @@ const threadCreate = async (req, res) => {
             title,
             content
         });
-        res.status(201).json(thread);
+        const { _id, author, createdAt, updatedAt } = thread;
+        res.status(201).json({ _id, author, createdAt, updatedAt, title, content });
     } catch(err) {
         console.log(err);
     }
@@ -35,8 +36,19 @@ const threadGetById = async (req, res) => {
             res.status(404).send("Thread doesn't exist.");
             return;
         }
-        const comments = await Comment.find({thread_id: id});
-        res.status(200).json({ thread, comments });
+        const comments = await Comment.find({thread_id: id}).sort({createdAt: 1});
+        const processedComments = comments.map((comment) => {
+            if (comment.deleted) {
+                comment._id = null;
+                comment.content = null;
+            }
+            return comment;
+        });
+        const { _id, author, createdAt, updatedAt, title, content } = thread;
+        res.status(200).json({
+            thread: { _id, author, createdAt, updatedAt, title, content },
+            comments: processedComments
+        });
     } catch(err) {
         console.log(err);
     }
@@ -44,8 +56,8 @@ const threadGetById = async (req, res) => {
 
 const threadList = async (req, res) => {
     try {
-        const threads = await Thread.find({deleted: false}).sort({updatedAt: -1});
-        res.status(200).json({ threads });
+        const threads = await Thread.find({deleted: false}).select("-deleted").sort({updatedAt: -1});
+        res.status(200).json(threads);
     } catch(err) {
         console.log(err);
     }
@@ -74,7 +86,8 @@ const threadUpdate = async (req, res) => {
         thread.content = content;
         thread.updatedAt = new Date();
         thread.save();
-        res.status(200).json({ thread });
+        const { _id, author, createdAt, updatedAt, title } = thread;
+        res.status(201).json({ _id,  author, createdAt, updatedAt, title, content });
     } catch(err) {
         console.log(err);
     }
@@ -99,7 +112,7 @@ const threadDelete = async (req, res) => {
         thread.deleted = true;
         thread.updatedAt = new Date();
         thread.save();
-        res.status(200).send("Content deleted.");
+        res.status(200).send("Thread deleted.");
     } catch(err) {
         console.log(err);
     }
