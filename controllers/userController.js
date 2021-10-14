@@ -43,7 +43,7 @@ const userLogin = async (req, res) => {
             res.status(400).send("Username and password are required for login.");
             return;
         }
-        const user = await User.findOne({ username }).select("+password");
+        const user = await User.findOne({ username });
         let passwordMatch = false;
         if (user) {
             passwordMatch = await bcrypt.compare(password, user.password);
@@ -56,7 +56,7 @@ const userLogin = async (req, res) => {
             );
             user.token = token;
             const { email } = user;
-            res.status(201).json({ username, email, token });
+            res.status(200).json({ username, email, token });
         } else {
             res.status(400).send("Invalid credentials");
         }
@@ -66,4 +66,4 @@ const userLogin = async (req, res) => {
     
 }
 
-export { userRegister, userLogin }
+export { userRegister, userLogin };
