@@ -10,7 +10,7 @@ const threadSchema = new mongoose.Schema({
     updatedAt: {type: Date},
     title: {type: String},
     content: {type: String},
-    deleted: {type: Boolean, select: false, default: false}
+    deleted: {type: Boolean, default: false}
 });
 
 const Thread = mongoose.model("thread", threadSchema);

@@ -10,7 +10,7 @@ const commentSchema = new mongoose.Schema({
     createdAt: {type: Date},
     updatedAt: {type: Date},
     content: {type: String},
-    deleted: {type: Boolean, select: false, default: false}
+    deleted: {type: Boolean, default: false}
 });
 
 const Comment = mongoose.model("comment", commentSchema);
