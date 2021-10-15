@@ -1,6 +1,8 @@
 # simple-forum-api
 An api with the functionalities of a simple forum.
 
+Repository: https://github.com/javier-op/simple-forum-api
+
 # User endpoints
 ```POST /register``` : create a user
 
