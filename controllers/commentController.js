@@ -8,13 +8,16 @@ const commentCreate = async (req, res) => {
             res.status(400).send("All input is required.");
             return;
         }
+        // the thread mus exist to post a comment
         const thread = await Thread.findById(thread_id);
         if (!thread || thread.deleted) {
             res.status(404).send("Thread doesn't exist.");
             return;
         }
         const currentDate = new Date();
+        // thread is bumped
         thread.updatedAt = currentDate;
+        thread.save();
         const { user_id, username, email } = req.user;
         const comment = await Comment.create({
             author: { user_id, username, email },
@@ -23,7 +26,6 @@ const commentCreate = async (req, res) => {
             updatedAt: currentDate,
             content
         });
-        thread.save();
         const { _id, author, createdAt, updatedAt } = comment;
         res.status(201).json({ _id, author, thread_id, createdAt, updatedAt, content });
     } catch(err) {
@@ -66,6 +68,7 @@ const commentUpdate = async (req, res) => {
             res.status(404).send("Comment doesn't exist.");
             return;
         }
+        // threads can only be edited by his author
         if (comment.author.user_id.toString() !== req.user.user_id) {
             res.status(403).send("Permission denied.");
             return;
@@ -96,6 +99,7 @@ const commentDelete = async (req, res) => {
             res.status(403).send("Permission denied.");
             return;
         }
+        // deletion is made by a flag, for moderation reasons
         comment.deleted = true;
         comment.updatedAt = new Date();
         comment.save();

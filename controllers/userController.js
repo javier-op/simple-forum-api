@@ -18,12 +18,14 @@ const userRegister = async (req, res) => {
             res.status(409).send("Email already in use. Please use another.");
             return;
         }
+        // hash password before storing
         const encryptedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             username,
             email: email.toLowerCase(),
             password: encryptedPassword,
         });
+        // create token for login
         const token = jwt.sign(
             { user_id: user._id, username, email },
             process.env.TOKEN_KEY,
@@ -43,11 +45,13 @@ const userLogin = async (req, res) => {
             res.status(400).send("Username and password are required for login.");
             return;
         }
+        // find username and check password match
         const user = await User.findOne({ username });
         let passwordMatch = false;
         if (user) {
             passwordMatch = await bcrypt.compare(password, user.password);
         }
+        // create login token
         if (user && passwordMatch) {
             const token = jwt.sign(
                 { user_id: user._id, username, email: user.email },

@@ -6,10 +6,12 @@ import { threadCreate, threadGetById, threadList, threadUpdate, threadDelete } f
 import { userLogin, userRegister } from "./controllers/userController.js";
 import { verifyToken as auth } from "./middleware/auth.js";
 
+// express app definition
 const app = express();
 app.use(express.json());
 connect();
 
+// endpoint routing
 app.post("/login", userLogin);
 app.post("/register", userRegister);
 app.get("/welcome", auth, (req, res) => {

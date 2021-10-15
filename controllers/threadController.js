@@ -36,7 +36,9 @@ const threadGetById = async (req, res) => {
             res.status(404).send("Thread doesn't exist.");
             return;
         }
+        // retrieve all this thread's comments
         const comments = await Comment.find({thread_id: id}).sort({createdAt: 1});
+        // if comments were deleted remove id and content
         const processedComments = comments.map((comment) => {
             if (comment.deleted) {
                 comment._id = null;
@@ -67,6 +69,7 @@ const threadUpdate = async (req, res) => {
     try {
         const { id } = req.params;
         const { content } = req.body;
+        // a thread's title can't be edited
         if (!(id)) {
             res.status(400).send("An id is required.");
             return;
@@ -79,6 +82,7 @@ const threadUpdate = async (req, res) => {
             res.status(404).send("Thread doesn't exist.");
             return;
         }
+        // threads can only be edited by his author
         if (thread.author.user_id.toString() !== req.user.user_id) {
             res.status(403).send("Permission denied.");
             return;
@@ -87,7 +91,7 @@ const threadUpdate = async (req, res) => {
         thread.updatedAt = new Date();
         thread.save();
         const { _id, author, createdAt, updatedAt, title } = thread;
-        res.status(201).json({ _id,  author, createdAt, updatedAt, title, content });
+        res.status(200).json({ _id,  author, createdAt, updatedAt, title, content });
     } catch(err) {
         console.log(err);
     }
@@ -109,6 +113,7 @@ const threadDelete = async (req, res) => {
             res.status(403).send("Permission denied.");
             return;
         }
+        // deletion is made by a flag, for moderation reasons
         thread.deleted = true;
         thread.updatedAt = new Date();
         thread.save();
