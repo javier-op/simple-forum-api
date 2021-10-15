@@ -14,6 +14,7 @@ const commentCreate = async (req, res) => {
             return;
         }
         const currentDate = new Date();
+        thread.updatedAt = currentDate;
         const { user_id, username, email } = req.user;
         const comment = await Comment.create({
             author: { user_id, username, email },
@@ -22,6 +23,7 @@ const commentCreate = async (req, res) => {
             updatedAt: currentDate,
             content
         });
+        thread.save();
         const { _id, author, createdAt, updatedAt } = comment;
         res.status(201).json({ _id, author, thread_id, createdAt, updatedAt, content });
     } catch(err) {
