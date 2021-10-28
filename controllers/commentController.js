@@ -52,6 +52,28 @@ const commentGetById = async (req, res) => {
     }
 };
 
+const commentGetByThreadId = async (req, res) => {
+    try {
+        const { thread_id } = req.params;
+        if (!(thread_id)) {
+            req.statusCode(400).send("A thread id is required.");
+            return;
+        }
+        const comments = await Comment.find({ thread_id }).sort({createdAt: 1});
+        // if comments were deleted remove id and content
+        const processedComments = comments.map((comment) => {
+            if (comment.deleted) {
+                comment._id = null;
+                comment.content = null;
+            }
+            return comment;
+        });
+        res.status(200).json({ comments: processedComments });
+    } catch(err) {
+        console.log(err);
+    }
+};
+
 const commentUpdate = async (req, res) => {
     try {
         const { id } = req.params;
@@ -109,4 +131,4 @@ const commentDelete = async (req, res) => {
     }
 };
 
-export { commentCreate, commentGetById, commentUpdate, commentDelete };
+export { commentCreate, commentGetById, commentGetByThreadId, commentUpdate, commentDelete };

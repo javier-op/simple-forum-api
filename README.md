@@ -91,6 +91,8 @@ Request body format:
 
 ```GET /comment/{id}``` : retrieve a comment
 
+```GET /comment?thread_id={thread_id}``` : list all comments in a thread
+
 ```PUT /comment/{id}``` : edit content of a comment
 
 Request body format:

@@ -36,21 +36,8 @@ const threadGetById = async (req, res) => {
             res.status(404).send("Thread doesn't exist.");
             return;
         }
-        // retrieve all this thread's comments
-        const comments = await Comment.find({thread_id: id}).sort({createdAt: 1});
-        // if comments were deleted remove id and content
-        const processedComments = comments.map((comment) => {
-            if (comment.deleted) {
-                comment._id = null;
-                comment.content = null;
-            }
-            return comment;
-        });
         const { _id, author, createdAt, updatedAt, title, content } = thread;
-        res.status(200).json({
-            thread: { _id, author, createdAt, updatedAt, title, content },
-            comments: processedComments
-        });
+        res.status(200).json({ _id, author, createdAt, updatedAt, title, content });
     } catch(err) {
         console.log(err);
     }

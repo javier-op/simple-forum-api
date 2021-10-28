@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { connect } from "./config/database.js";
-import { commentCreate, commentGetById, commentUpdate, commentDelete } from "./controllers/commentController.js";
+import { commentCreate, commentGetById, commentGetByThreadId, commentUpdate, commentDelete } from "./controllers/commentController.js";
 import express from "express";
 import { threadCreate, threadGetById, threadList, threadUpdate, threadDelete } from "./controllers/threadController.js";
 import { userLogin, userRegister } from "./controllers/userController.js";
@@ -24,6 +24,7 @@ app.put("/thread/:id", auth, threadUpdate);
 app.delete("/thread/:id", auth, threadDelete);
 app.post("/comment", auth, commentCreate);
 app.get("/comment/:id", auth, commentGetById);
+app.get("/comment", auth, commentGetByThreadId);
 app.put("/comment/:id", auth, commentUpdate);
 app.delete("/comment/:id", auth, commentDelete);
 
